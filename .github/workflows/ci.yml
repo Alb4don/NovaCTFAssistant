@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Verify zero dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            echo "Error: requirements.txt found. This tool uses only the Python standard library."
+            exit 1
+          fi
+          if [ -f setup.py ] || [ -f pyproject.toml ]; then
+            echo "Error: Package configuration found. This tool is a standalone script."
+            exit 1
+          fi
+
+      - name: Syntax validation
+        run: python -m py_compile nova.py
